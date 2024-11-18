@@ -37,7 +37,7 @@ const Requests = () => {
 
   if (requests.length === 0)
     return (
-        <div className="h-screen p-4 m-4">
+        <div className="h-screen p-4 m-4 mt-24">
         <div role="alert" className="alert w-1/2 flex justify-center items-center mx-auto alert-warning">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -57,7 +57,7 @@ const Requests = () => {
     
 
   return (
-    <div className="text-center my-10 ">
+    <div className="text-center my-10 mt-24">
       <h1 className="text-bold text-3xl">Connection Requests</h1>
     <div className="flex flex-wrap m-4 gap-4">
       {requests.map((request) => {

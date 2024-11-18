@@ -32,7 +32,7 @@ const Body = () => {
   return (
     <>
         <Header/>
-        <Outlet/>
+        <Outlet />
         <Footer/>
     </>
   )

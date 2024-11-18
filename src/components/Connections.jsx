@@ -25,7 +25,7 @@ const Connections = () => {
   if (!connections) return;
 
   if (connections.length === 0) return (
-    <div className="h-screen p-4 m-4">
+    <div className="h-screen p-4 m-4 mt-24">
     <div role="alert" className="alert w-1/2 flex justify-center items-center mx-auto alert-warning">
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -44,7 +44,7 @@ const Connections = () => {
   );
 
   return (
-    <div className="text-center my-10 h-screen">
+    <div className="text-center my-10 h-screen mt-24">
       <h1 className="text-bold text-3xl">Connections</h1>
     <div className="flex flex-wrap gap-4 m-4 p-4">
       {connections.map((connection) => {

@@ -30,7 +30,7 @@ const Feed = () => {
 
   if (feed.length <= 0)
     return (
-      <div className="h-screen p-4 m-4">
+      <div className="h-screen p-4 m-4 mt-24">
         <div
           role="alert"
           className="alert w-1/2 flex justify-center items-center mx-auto alert-warning"
@@ -55,7 +55,7 @@ const Feed = () => {
 
   return (
     feed && (
-      <div className="flex justify-center my-10">
+      <div className="flex justify-center my-10 mt-24">
         <UserCard user={feed[0]} />
       </div>
     )
