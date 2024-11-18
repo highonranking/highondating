@@ -47,8 +47,7 @@ const Connections = () => {
     <div className="text-center my-10 h-screen">
       <h1 className="text-bold text-3xl">Connections</h1>
     <div className="flex flex-wrap gap-4 m-4 p-4">
-      {connections.map((user) => {
-        console.log(user);
+      {connections.map((connection) => {
         const { _id, firstName, lastName, photoUrl, age, gender, about } =
           connection;
      

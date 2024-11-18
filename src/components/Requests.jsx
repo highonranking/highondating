@@ -57,7 +57,7 @@ const Requests = () => {
     
 
   return (
-    <div className="text-center my-10 h-screen">
+    <div className="text-center my-10 ">
       <h1 className="text-bold text-3xl">Connection Requests</h1>
     <div className="flex flex-wrap m-4 gap-4">
       {requests.map((request) => {
