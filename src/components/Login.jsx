@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux';
 import { addUser } from '../utils/userSlice';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +8,7 @@ import { BASE_URL } from '../utils/constants';
 const Login = () => {
     const [emailID, setEmailID] =  useState("miaa@gmail.com");
     const [password, setPassword] = useState("Miaakhalifa@123");
+    const [error, setError] = useState("");
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -21,18 +22,43 @@ const Login = () => {
             return navigate("/");
         }
         catch(err){
+            setError(err.response.data);
             console.log(err);
         }
        
     }
+    useEffect(()=>{
+        setTimeout(()=>{
+            setError("");
+        }, 2000)
+    },[error])
 
   return (
+    <div className='h-screen'>
+    {error&&(
+        <div role="alert" className="w-1/3 flex items-center justify-center mx-auto alert alert-error">
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-6 w-6 shrink-0 stroke-current"
+        fill="none"
+        viewBox="0 0 24 24">
+        <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <span>{error}</span>
+    </div>
+    )}
+
     <div className='flex mt-24 items-center justify-center'>
+        
         <div className="card w-auto h-fit lg:card-side bg-base-100 shadow-xl">
         <figure>
             <img
             className='w-auto h-96'
-            src="https://img.freepik.com/free-photo/lovely-couple-posing-bed_329181-18612.jpg?t=st=1731677131~exp=1731680731~hmac=4c4d2f4dbc877b0af3491205d808398fe20f3fff6f5d156772e59f689ab3a489&w=1060"
+            src="https://i.insider.com/61e1b39d7c6a200018421dc5?width=2000&format=jpeg&auto=webp"
             alt="Album" />
         </figure>
         <div className="card-body">
@@ -67,6 +93,8 @@ const Login = () => {
         <button onClick={handleLogin} className="btn btn-xs sm:btn-sm md:btn-md bg-primary lg:btn-lg">Login</button>
         </div>
     </div>
+    
+</div>
 </div>
   )
 }

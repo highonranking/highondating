@@ -1,9 +1,28 @@
-import { useSelector } from "react-redux";
+import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { BASE_URL } from "../utils/constants";
+import { removeUser } from "../utils/userSlice";
+import Cookies from 'js-cookie';
+import { Link, useNavigate } from "react-router-dom";
+
 
 const Header = () => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
     const user = useSelector(store => store.user);
+    const handleLogout = async ()=>{
+        try{
+            const userLogout = await axios.post(BASE_URL+"/logout", {}, {withCredentials:true});
+            dispatch(removeUser(userLogout.data));
+           // Cookies.remove('token');
+            navigate("/login");
+        }
+        catch(err){
+            console.log(err);
+        }
+    }
     return(
-            <div className="navbar bg-base-100">
+            <div className="navbar bg-base-100 z-10">
             <div className="navbar-start">
                 <div className="dropdown">
                 <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
@@ -23,9 +42,10 @@ const Header = () => {
                 <ul
                     tabIndex={0}
                     className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow">
-                    <li><a href="/">Home</a></li>
-                    <li><a>Connections</a></li>
-                    <li><a href="/login">Profile</a></li>
+                    <li><Link to="/">Home</Link></li>
+                    <li><Link to="/profile">Profile</Link></li>
+                    <li><Link to="/requests">Requests</Link></li>
+                    <li><Link to="/connections">Connections</Link></li>
                 </ul>
                 </div>
             </div>
@@ -48,13 +68,20 @@ const Header = () => {
                 </svg>
                 </button>
                 {user &&(
-                <button className="btn btn-ghost btn-circle">
-                <div className="indicator">
+                <button className="btn btn-ghost btn-circle dropdown">
+                <div  tabIndex={1} role="button" className="indicator ">
                 <div className="avatar online">
                     <div className="w-10 rounded-full">
                         <img src={user.photoUrl} />
+                        <ul
+                    tabIndex={1}
+                    className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow">
+                    <li><button type="button" onClick={handleLogout} href="">Logout</button></li>
+                </ul>
                     </div>
+                 
                     </div>
+                   
                 </div>
                 </button>
                 )}
