@@ -3,6 +3,7 @@ import { BASE_URL } from "../utils/constants";
 import { useDispatch, useSelector } from "react-redux";
 import { addRequests, removeRequest } from "../utils/requestSlice";
 import { useEffect, useState } from "react";
+import ShimmerUserCard from "./ShimmerUserCard";
 
 const Requests = () => {
   const requests = useSelector((store) => store.requests);
@@ -35,7 +36,11 @@ const Requests = () => {
     fetchRequests();
   }, []);
 
-  if (!requests) return;
+  if (!requests) return(
+    <div className="flex justify-center items-center h-screen">
+    <ShimmerUserCard/>
+    </div>
+  );
 
   if (requests.length === 0)
     return (

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addConnections } from "../utils/connectionSlice";
 import ChatWindow from "./ChatWindow"; // Import ChatWindow component
+import ShimmerUserCard from "./ShimmerUserCard";
 
 
 const Connections = () => {
@@ -28,7 +29,11 @@ const Connections = () => {
     fetchConnections();
   }, []);
 
-  if (!connections) return;
+  if (!connections) return(
+    <div className="flex justify-center items-center h-screen">
+    <ShimmerUserCard/>
+    </div>
+  );
 
   if (connections.length === 0)
     return (
