@@ -30,7 +30,9 @@ const Feed = () => {
   }, []);
 
   if (!feed) return (
+    <div className="flex justify-center items-center">
     <ShimmerUserCard/>
+    </div>
   );
 
   if (feed.length <= 0)
