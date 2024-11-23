@@ -1,1 +1,1 @@
-export const BASE_URL = 'https://highondating-service.onrender.com';
+export const BASE_URL = 'https://api.bookmyheart.in';
