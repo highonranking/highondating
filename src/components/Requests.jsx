@@ -9,6 +9,8 @@ const Requests = () => {
   const dispatch = useDispatch();
 
   const reviewRequest = async (status, _id) => {
+    axios.defaults.withCredentials = true;
+
     try {
       const res = axios.post(
         BASE_URL + "/request/review/" + status + "/" + _id,

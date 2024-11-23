@@ -7,10 +7,13 @@ import { Link, useNavigate } from "react-router-dom";
 
 
 const Header = () => {
+
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const user = useSelector(store => store.user);
     const handleLogout = async ()=>{
+        axios.defaults.withCredentials = true;
+
         try{
             const userLogout = await axios.post(BASE_URL+"/logout", {}, {withCredentials:true});
             dispatch(removeUser(userLogout.data));

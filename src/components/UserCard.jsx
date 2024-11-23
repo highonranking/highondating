@@ -11,6 +11,8 @@ const UserCard = ({ user }) => {
   const dispatch = useDispatch();
 
   const handleAction = async (status) => {
+    axios.defaults.withCredentials = true;
+
     try {
       await axios.post(
         `${BASE_URL}/request/send/${status}/${_id}`,

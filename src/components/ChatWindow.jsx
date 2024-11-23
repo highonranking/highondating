@@ -13,6 +13,8 @@ const ChatWindow = ({ connection, onClose }) => {
   const loggedInUserId = user?._id; 
 
   const fetchMessages = async () => {
+    axios.defaults.withCredentials = true;
+
     try {
       const res = await axios.get(
         `${BASE_URL}/api/messages?userId1=${connection._id}&userId2=${loggedInUserId}`,

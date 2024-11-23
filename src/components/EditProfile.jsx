@@ -17,6 +17,8 @@ const EditProfile = ({ user }) => {
   const [showToast, setShowToast] = useState(false);
 
   const saveProfile = async () => {
+    axios.defaults.withCredentials = true;
+
     //Clear Errors
     setError("");
     try {

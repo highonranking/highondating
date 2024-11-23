@@ -12,6 +12,8 @@ const Connections = () => {
   const [selectedConnection, setSelectedConnection] = useState(null); // To manage selected chat
 
   const fetchConnections = async () => {
+    axios.defaults.withCredentials = true;
+
     try {
       const res = await axios.get(BASE_URL + "/user/connections", {
         withCredentials: true,

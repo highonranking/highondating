@@ -10,6 +10,8 @@ const Feed = () => {
   const dispatch = useDispatch();
 
   const getFeed = async () => {
+    axios.defaults.withCredentials = true;
+
     // if (feed) return;
     console.log(feed);
     try {
