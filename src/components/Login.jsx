@@ -53,7 +53,7 @@ const Login = () => {
     <div
       className="h-screen bg-cover bg-center"
       style={{
-        backgroundImage: `url(${BG_IMG})`, // Replace with your image URL
+        backgroundImage: `url(${BG_IMG})`, 
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}

@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addFeed } from "../utils/feedSlice";
 import { useEffect } from "react";
 import UserCard from "./UserCard";
+import ShimmerUserCard from "./ShimmerUserCard";
 
 const Feed = () => {
   const feed = useSelector((store) => store.feed);
@@ -20,7 +21,7 @@ const Feed = () => {
       });
       dispatch(addFeed(res?.data?.data));
     } catch (err) {
-      console.error("Failed to fetch feed", err); // Handle error
+      console.error("Failed to fetch feed", err); 
     }
   };
 
@@ -28,7 +29,9 @@ const Feed = () => {
     getFeed();
   }, []);
 
-  if (!feed) return null;
+  if (!feed) return (
+    <ShimmerUserCard/>
+  );
 
   if (feed.length <= 0)
     return (
