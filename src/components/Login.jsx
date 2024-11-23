@@ -7,8 +7,8 @@ import { BASE_URL } from "../utils/constants";
 import BG_IMG from '../assets/bg.jpg'
 
 const Login = () => {
-  const [emailId, setEmailId] = useState("abhinav@gmail.com");
-  const [password, setPassword] = useState("Abhinav@123");
+  const [emailId, setEmailId] = useState("");
+  const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [isLoginForm, setIsLoginForm] = useState(true);
