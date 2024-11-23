@@ -53,7 +53,7 @@ const Header = () => {
                 </div>
             </div>
             <div className="navbar-center">
-                <a className="btn btn-ghost text-3xl italic font-extralight leading-loose ">highondating</a>
+                <a className="btn btn-ghost text-3xl italic font-extralight leading-loose ">bookmy❤️</a>
             </div>
             <div className="navbar-end">
                 <button className="btn btn-ghost btn-circle">
