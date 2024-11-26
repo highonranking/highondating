@@ -7,7 +7,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const UserCard = ({ user }) => {
-  const { _id, firstName, lastName, photoUrl, age, gender, about } = user;
+  const { _id, firstName, lastName, photoUrl, age, gender, about, skills } = user;
   const dispatch = useDispatch();
 
   const handleAction = async (status) => {
@@ -54,6 +54,20 @@ const UserCard = ({ user }) => {
         <div className="card-body">
           <h2 className="card-title">{`${firstName} ${lastName}`}</h2>
           <p>{`${about.substring(0, 40)}...`}</p>
+          <div className="mt-2">
+      {skills?.length > 0 ? (
+        skills.map((skill) => (
+          <span
+            key={skill}
+            className="badge badge-primary badge-sm mr-2"
+          >
+            {skill}
+          </span>
+        ))
+      ) : (
+        <p className="text-gray-500">No skills found</p>
+      )}
+    </div>
           <div className="card-actions justify-center flex gap-24 mt-12">
             <button
               className="btn btn-secondary"

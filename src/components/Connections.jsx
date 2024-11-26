@@ -52,7 +52,7 @@ const Connections = () => {
       <h1 className="text-bold text-3xl">Connections</h1>
       <div className="flex flex-wrap gap-4 m-4 p-4">
         {connections.map((connection) => {
-          const { _id, firstName, lastName, photoUrl, age, gender, about } =
+          const { _id, firstName, lastName, photoUrl, age, gender, about, skills } =
             connection;
 
           return (
@@ -68,6 +68,20 @@ const Connections = () => {
                     <div className="badge badge-primary"> {age} </div>
                   </h2>
                   <p>{about}</p>
+                  <div className="mt-1 mb-4">
+                  {skills?.length > 0 ? (
+                    skills.map((skill) => (
+                      <span
+                        key={skill}
+                        className="badge badge-primary badge-sm mr-2"
+                      >
+                        {skill}
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-gray-500">No skills found</p>
+                  )}
+                </div>
                   <button
                     className="btn btn-primary"
                     onClick={() => setSelectedConnection(connection)}

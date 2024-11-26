@@ -69,7 +69,7 @@ const Requests = () => {
     <div className="flex flex-wrap m-4 gap-4">
       {requests.map((request) => {
 
-        const { _id, firstName, lastName, photoUrl, age, gender, about } =
+        const { _id, firstName, lastName, photoUrl, age, gender, about, skills } =
           request.fromUserId;
 
         return (
@@ -92,6 +92,20 @@ const Requests = () => {
                     <p>{about}</p>
                 </div>
                 <div>
+                <div className="mt-1 mb-4">
+                  {skills?.length > 0 ? (
+                    skills.map((skill) => (
+                      <span
+                        key={skill}
+                        className="badge badge-primary badge-sm mr-2"
+                      >
+                        {skill}
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-gray-500">No skills selected</p>
+                  )}
+                </div>
               <button
                 className="btn btn-secondary mx-2"
                 onClick={() => reviewRequest("rejected", request._id)}
