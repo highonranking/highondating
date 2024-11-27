@@ -4,6 +4,7 @@ import { BASE_URL } from "../utils/constants";
 import { useDispatch } from "react-redux";
 import { addUser } from "../utils/userSlice";
 import UserEditCard from "./UserEditCard";
+import { totalskills } from "../utils/constants";
 
 const EditProfile = ({ user }) => {
   const [firstName, setFirstName] = useState(user.firstName);
@@ -22,6 +23,12 @@ const EditProfile = ({ user }) => {
     axios.defaults.withCredentials = true;
 
     setError("");
+
+    if (skills.length < 3) {
+      setError("Please select at least 3 skills.");
+      return;
+    }
+
     try {
       const res = await axios.patch(
         BASE_URL + "/profile/edit",
@@ -57,7 +64,6 @@ const EditProfile = ({ user }) => {
   return (
     <>
       <div className="flex flex-col lg:flex-row justify-center items-start gap-8 my-10 px-4 sm:px-6 md:px-8">
-        {/* Profile Form */}
         <div className="flex-1 max-w-md w-full">
           <div className="card bg-base-300 w-full shadow-xl">
             <div className="card-body">
@@ -182,7 +188,6 @@ const EditProfile = ({ user }) => {
           </div>
         </div>
 
-        {/* User Edit Card */}
         <div className="">
           <UserEditCard
             user={{ firstName, lastName, photoUrl, age, gender, about, skills }}
@@ -198,46 +203,44 @@ const EditProfile = ({ user }) => {
         </div>
       )}
 
-      {showModal && (
-        <div className="modal modal-open">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg">Select Your Skills</h3>
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              {[
-                "JavaScript",
-                "React",
-                "Node.js",
-                "CSS",
-                "HTML",
-                "Python",
-                "Java",
-                "C++",
-              ].map((skill) => (
-                <label
-                  key={skill}
-                  className="cursor-pointer flex items-center space-x-2"
-                >
-                  <input
-                    type="checkbox"
-                    className="checkbox checkbox-primary"
-                    checked={skills.includes(skill)}
-                    onChange={() => toggleSkill(skill)}
-                  />
-                  <span className="label-text">{skill}</span>
-                </label>
-              ))}
-            </div>
-            <div className="modal-action">
-              <button
-                className="btn btn-secondary"
-                onClick={() => setShowModal(false)}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
+    {showModal && (
+  <div className="modal modal-open">
+    <div className="modal-box">
+      <h3 className="font-bold text-lg">Select Your Skills</h3>
+      <div className="grid grid-cols-2 gap-4 mt-4">
+        {totalskills?.map((skill) => (
+          <label
+            key={skill}
+            className="cursor-pointer flex items-center space-x-2"
+          >
+            <input
+              type="checkbox"
+              className="checkbox checkbox-primary"
+              checked={skills.includes(skill)}
+              onChange={() => toggleSkill(skill)}
+            />
+            <span className="label-text">{skill}</span>
+          </label>
+        ))}
+      </div>
+      <div className="modal-action">
+        <button
+          className="btn btn-secondary"
+          onClick={() => setShowModal(false)}
+          disabled={skills.length < 3}
+        >
+          Close
+        </button>
+      </div>
+      {skills.length < 3 && (
+        <p className="text-red-500 text-sm mt-2">
+          Please select at least 3 skills.
+        </p>
       )}
+    </div>
+  </div>
+)}
+
     </>
   );
 };
