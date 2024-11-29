@@ -24,7 +24,7 @@ const EditProfile = ({ user }) => {
 
     setError("");
 
-    if (skills.length < 3) {
+    if (skills.length < 3 || skills.length > 5 ) {
       setError("Please select at least 3 skills.");
       return;
     }
@@ -227,7 +227,7 @@ const EditProfile = ({ user }) => {
         <button
           className="btn btn-secondary"
           onClick={() => setShowModal(false)}
-          disabled={skills.length < 3}
+          disabled={skills.length < 3 || skills.length > 5}
         >
           Close
         </button>
@@ -235,6 +235,11 @@ const EditProfile = ({ user }) => {
       {skills.length < 3 && (
         <p className="text-red-500 text-sm mt-2">
           Please select at least 3 skills.
+        </p>
+      )}
+      {skills.length > 5 && (
+        <p className="text-red-500 text-sm mt-2">
+          Please select at most 5 skills.
         </p>
       )}
     </div>
