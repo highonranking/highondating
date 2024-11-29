@@ -13,19 +13,35 @@ const EditProfile = ({ user }) => {
   const [age, setAge] = useState(user.age || "");
   const [gender, setGender] = useState(user.gender || "");
   const [about, setAbout] = useState(user.about || "");
-  const [skills, setSkills] = useState(user?.skills);
+  const [skills, setSkills] = useState(user?.skills || []);
   const [error, setError] = useState("");
   const dispatch = useDispatch();
   const [showToast, setShowToast] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [location, setLocation] = useState(user?.location || { latitude: "", longitude: "" });
+  const [isFetchingLocation, setIsFetchingLocation] = useState(false);
 
   const saveProfile = async () => {
     axios.defaults.withCredentials = true;
 
     setError("");
 
-    if (skills.length < 3 || skills.length > 5 ) {
-      setError("Please select at least 3 skills.");
+    if (skills.length < 3 || skills.length > 5) {
+      setError("Please select at least 3 skills and at most 5 skills.");
+      return;
+    }
+    const lat = parseFloat(location.latitude);
+    const lon = parseFloat(location.longitude);
+
+    console.log(lat, lon);
+
+    if (isNaN(lat) || isNaN(lon)) {
+      setError("Latitude and Longitude must be valid numbers.");
+      return;
+    }
+
+    if (lat === "" || lon === "") {
+      setError("Please provide a valid location.");
       return;
     }
 
@@ -40,6 +56,7 @@ const EditProfile = ({ user }) => {
           gender,
           about,
           skills,
+          location: { type: "Point", coordinates: [lon, lat] },
         },
         { withCredentials: true }
       );
@@ -49,8 +66,32 @@ const EditProfile = ({ user }) => {
         setShowToast(false);
       }, 3000);
     } catch (err) {
-      setError(err.response.data);
+      setError(err.response?.data?.message || "An error occurred. Please try again.");
     }
+  };
+
+  const fetchCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setError("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    setIsFetchingLocation(true);
+    setError("");
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+        setIsFetchingLocation(false);
+      },
+      (err) => {
+        setError("Unable to fetch location. Please enter manually.");
+        setIsFetchingLocation(false);
+      }
+    );
   };
 
   const toggleSkill = (skill) => {
@@ -161,39 +202,42 @@ const EditProfile = ({ user }) => {
                   </div>
                 </label>
 
-                <label className="form-control w-full">
+                <div className="form-control w-full">
                   <div className="label">
-                    <span className="label-text">About:</span>
+                    <span className="label-text">Location:</span>
                   </div>
-                  <input
-                    type="text"
-                    value={about}
-                    className="input input-bordered w-full"
-                    onChange={(e) => setAbout(e.target.value)}
-                  />
-                </label>
-              </div>
+                  <button
+                    className={`btn btn-primary ${isFetchingLocation ? "loading" : ""}`}
+                    onClick={fetchCurrentLocation}
+                    disabled={isFetchingLocation}
+                  >
+                    {isFetchingLocation ? "Fetching Location..." : "Use Current Location"}
+                  </button>
+                </div>
 
-              <p className="text-red-500 text-center">{error}</p>
-
-              <div className="card-actions justify-center mt-4">
-                <button
-                  className="btn btn-primary w-full sm:w-auto"
-                  onClick={saveProfile}
-                >
-                  Save Profile
-                </button>
+                {location.latitude && location.longitude && (
+                  <p className="text-success mt-2">
+                    Location captured: {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}
+                  </p>
+                )}
+            
+                <div className="card-actions justify-center mt-4">
+                  <button className="btn btn-primary" onClick={saveProfile}>
+                    Save Profile
+                  </button>
+                </div>
               </div>
             </div>
           </div>
+         
         </div>
-
         <div className="">
           <UserEditCard
-            user={{ firstName, lastName, photoUrl, age, gender, about, skills }}
+            user={{ firstName, lastName, photoUrl, age, gender, about, skills, location }}
           />
-        </div>
+          </div>
       </div>
+    
 
       {showToast && (
         <div className="toast toast-top toast-center">
@@ -203,7 +247,8 @@ const EditProfile = ({ user }) => {
         </div>
       )}
 
-    {showModal && (
+
+      {showModal && (
   <div className="modal modal-open">
     <div className="modal-box">
       <h3 className="font-bold text-lg">Select Your Skills</h3>

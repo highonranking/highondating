@@ -5,10 +5,11 @@ import { addFeed } from "../utils/feedSlice";
 import { useEffect } from "react";
 import UserCard from "./UserCard";
 import ShimmerUserCard from "./ShimmerUserCard";
-
+import calculateDistance from "../utils/distance";
 const Feed = () => {
   const feed = useSelector((store) => store.feed);
   const dispatch = useDispatch();
+  const loggedInUser = useSelector((store) => store.user);
 
   const getFeed = async () => {
     axios.defaults.withCredentials = true;
@@ -16,9 +17,10 @@ const Feed = () => {
     // if (feed) return;
     console.log(feed);
     try {
-      const res = await axios.get(BASE_URL + "/feed", {
-        withCredentials: true,
-      });
+     const res = await axios.get(BASE_URL + "/feed", {
+      params: { latitude: loggedInUser?.location?.latitude, longitude: loggedInUser?.location?.longitude },
+      withCredentials: true,
+    });
       dispatch(addFeed(res?.data?.data));
     } catch (err) {
       console.error("Failed to fetch feed", err); 
@@ -60,10 +62,19 @@ const Feed = () => {
       </div>
     );
 
+    const distance = calculateDistance(
+      loggedInUser.location?.coordinates[0],  
+      loggedInUser.location?.coordinates[1],  
+      feed[0].location?.coordinates[0],  
+      feed[0].location?.coordinates[1]   
+    );
+    
+    console.log( feed[0].location?.coordinates[0]);  
+
   return (
     feed && (
       <div className="flex justify-center my-10 mt-24">
-        <UserCard user={feed[0]} />
+        <UserCard user={feed[0]} distance={distance} />
       </div>
     )
   );

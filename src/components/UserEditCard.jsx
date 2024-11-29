@@ -9,7 +9,6 @@ const UserEditCard = (data) => {
       src={data?.user?.photoUrl}
       alt="profile pic" />
   </figure>
-
   <div className='flex flex-row gap-12 my-2 justify-center'>
   <div className="badge badge-info gap-2">
   {data?.user?.age}
