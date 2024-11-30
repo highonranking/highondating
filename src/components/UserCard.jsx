@@ -1,18 +1,27 @@
-import axios from "axios";
-import { BASE_URL } from "../utils/constants";
-import { useDispatch } from "react-redux";
-import { removeUserFromFeed } from "../utils/feedSlice";
+import { useState } from "react";
+import { useSpring, animated } from "@react-spring/web";
 import { useSwipeable } from "react-swipeable";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useDispatch } from "react-redux";
+import axios from "axios";
+import { BASE_URL } from "../utils/constants";
+import { removeUserFromFeed } from "../utils/feedSlice";
 
 const UserCard = ({ user, distance }) => {
-  const { _id, firstName, lastName, photoUrl, age, gender, about, skills, location } = user;
+  const { _id, firstName, lastName, photoUrl, age, gender, about, skills } = user;
   const dispatch = useDispatch();
 
-  const handleAction = async (status) => {
-    axios.defaults.withCredentials = true;
+  const [isSwiped, setIsSwiped] = useState(false); 
 
+  const [{ x, rotate, scale }, api] = useSpring(() => ({
+    x: 0,
+    rotate: 0,
+    scale: 1,
+    config: { tension: 300, friction: 30 },
+  }));
+
+  const handleAction = async (status) => {
     try {
       await axios.post(
         `${BASE_URL}/request/send/${status}/${_id}`,
@@ -20,78 +29,127 @@ const UserCard = ({ user, distance }) => {
         { withCredentials: true }
       );
       dispatch(removeUserFromFeed(_id));
-      toast.success(
-        status === "interested" ? "Request Sent!" : "User Ignored"
-      );
+      toast.success(status === "interested" ? "Request Sent!" : "User Ignored");
     } catch (err) {
       toast.error("Failed to perform action");
     }
   };
 
   const swipeHandlers = useSwipeable({
-    onSwipedLeft: () => handleAction("ignored"),
-    onSwipedRight: () => handleAction("interested"),
-    delta: 50, 
-    preventScrollOnSwipe: true, 
-    trackTouch: true, 
-    trackMouse: true, 
+    onSwiping: ({ deltaX }) => {
+      api.start({
+        x: deltaX,
+        rotate: deltaX / 10,
+        scale: 1.05,
+      });
+    },
+    onSwipedLeft: () => {
+      api.start({
+        x: -window.innerWidth,
+        rotate: -20,
+        scale: 1,
+      });
+      setTimeout(() => {
+        handleAction("ignored");
+        api.start({ x: 0, rotate: 0, scale: 1 });
+      }, 300);
+    },
+    onSwipedRight: () => {
+      api.start({
+        x: window.innerWidth,
+        rotate: 20,
+        scale: 1,
+      });
+      setTimeout(() => {
+        handleAction("interested");
+        api.start({ x: 0, rotate: 0, scale: 1 }); 
+      }, 300);
+    },
+    delta: 50,
+    preventScrollOnSwipe: true,
+    trackTouch: true,
+    trackMouse: true,
   });
-
-
-  
 
   return (
     <>
-      <div
-        className="card min-h-[600px] glass w-96"
-        {...swipeHandlers}
-      >
-        <figure>
-          <img src={photoUrl} alt="profile pic" />
-        </figure>
-        
-        <div className="flex flex-row gap-12 my-2 justify-center">
-          <div className="badge badge-info gap-2">{age}</div>
-          <div className="badge badge-success gap-2">{gender}</div>
-        </div>
+<animated.div
+  {...swipeHandlers}
+  style={{
+    x,
+    rotate,
+    scale,
+    touchAction: "pan-y",
+  }}
+  className="relative min-h-[550px] w-96 bg-gradient-to-br from-purple-500 via-pink-500 to-red-500 rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105"
+>
+  <div className="absolute inset-0 rounded-3xl overflow-hidden opacity-30">
+    <div className="absolute -top-10 -left-10 w-48 h-48 bg-white rounded-full blur-[60px]"></div>
+    <div className="absolute bottom-0 right-0 w-64 h-64 bg-yellow-300 rounded-full blur-[80px]"></div>
+  </div>
 
-        <div className="card-body">
-        📍 {distance.toFixed(1)} kms away
-          <h2 className="card-title">{`${firstName} ${lastName}`}</h2>
-          <p>{`${about.substring(0, 40)}...`}</p>
+  <figure className="relative rounded-t-3xl overflow-hidden shadow-lg">
+    <img
+      src={photoUrl}
+      alt="profile pic"
+      draggable="false"
+      className="object-cover w-full h-64"
+    />
+  </figure>
 
-          <div className="mt-2">
+  <div className="relative z-10 p-6 bg-white rounded-b-3xl">
+    <div className="flex justify-between items-center mb-4">
+      <h2 className="text-2xl font-extrabold text-gray-800">
+        {`${firstName} ${lastName}`}
+      </h2>
+      <span className="text-sm text-gray-500">{age} years old</span>
+    </div>
+
+    <div className="flex gap-2 mb-4">
+      <span className="badge badge-primary py-1 px-2 bg-purple-200 text-purple-800 rounded-full">
+        {gender}
+      </span>
+      <span className="badge badge-secondary py-1 px-2 bg-blue-200 text-blue-800 rounded-full">
+        📍 {distance.toFixed(1)} km away
+      </span>
+    </div>
+
+    <p className="text-gray-600 mb-4">{`${about.substring(0, 40)}...`}</p>
+
+    <div className="flex flex-wrap gap-2 mb-6">
       {skills?.length > 0 ? (
         skills.map((skill) => (
           <span
             key={skill}
-            className="badge badge-primary badge-sm mr-2"
+            className="badge py-1 px-2 bg-gradient-to-br from-pink-300 to-purple-300 text-white rounded-full shadow transform transition duration-200 hover:scale-105"
           >
             {skill}
           </span>
         ))
       ) : (
-        <p className="text-gray-500">No skills found</p>
+        <p className="text-gray-400">No skills found</p>
       )}
     </div>
 
-          <div className="card-actions justify-center flex gap-24 mt-12">
-            <button
-              className="btn btn-secondary"
-              onClick={() => handleAction("ignored")}
-            >
-              ❌
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={() => handleAction("interested")}
-            >
-              ✔️
-            </button>
-          </div>
-        </div>
-      </div>
-      <ToastContainer/>
+    <div className="flex justify-between mt-6">
+      <button
+        className="btn w-20 h-10 bg-red-500 hover:bg-red-600 text-white font-bold rounded-full shadow-lg transform transition duration-200 hover:scale-110"
+        onClick={() => handleAction("ignored")}
+      >
+        ❌
+      </button>
+      <button
+        className="btn w-20 h-10 bg-green-500 hover:bg-green-600 text-white font-bold rounded-full shadow-lg transform transition duration-200 hover:scale-110"
+        onClick={() => handleAction("interested")}
+      >
+        ✔️
+      </button>
+    </div>
+  </div>
+</animated.div>
+
+
+      <ToastContainer />
     </>
   );
 };
