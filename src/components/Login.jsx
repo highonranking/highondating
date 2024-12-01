@@ -118,6 +118,7 @@ const Login = () => {
             <div className="card-actions justify-center m-2">
               <button
                 className="btn btn-primary"
+                disabled={!emailId||!password}
                 onClick={isLoginForm ? handleLogin : handleSignUp}
               >
                 {isLoginForm ? "Login" : "Sign Up"}

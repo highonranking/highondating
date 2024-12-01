@@ -4,13 +4,13 @@ import { BASE_URL } from "../utils/constants";
 import { io } from "socket.io-client";
 import { useSelector } from "react-redux";
 
-const socket = io(BASE_URL); 
+const socket = io(BASE_URL);
 
 const ChatWindow = ({ connection, onClose }) => {
   const user = useSelector((store) => store.user);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
-  const loggedInUserId = user?._id; 
+  const loggedInUserId = user?._id;
 
   const fetchMessages = async () => {
     axios.defaults.withCredentials = true;
@@ -28,19 +28,22 @@ const ChatWindow = ({ connection, onClose }) => {
 
   const sendMessage = async () => {
     try {
-      const res = await axios.post(
-        `${BASE_URL}/api/messages`,
-        {
-          senderId: loggedInUserId,
-          receiverId: connection._id,
-          messageContent: newMessage,
-        },
-        { withCredentials: true }
+      const message = {
+        senderId: loggedInUserId,
+        receiverId: connection._id,
+        messageContent: newMessage,
+      };
+      setMessages((prev) => [...prev, { ...message, local: true }]);
+      const res = await axios.post(`${BASE_URL}/api/messages`, message, {
+        withCredentials: true,
+      });
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.local ? { ...res.data.message, local: false } : msg
+        )
       );
 
-      console.log("Message sent:", res.data.message); 
-      setMessages((prev) => [...prev, res.data.message]);
-      setNewMessage(""); 
+      setNewMessage("");
     } catch (err) {
       console.error("Error sending message:", err);
     }
@@ -52,7 +55,6 @@ const ChatWindow = ({ connection, onClose }) => {
     socket.emit("join_room", connection._id);
 
     socket.on("new_message", (message) => {
-      console.log("New message received:", message);
       setMessages((prevMessages) => [...prevMessages, message]);
     });
 
@@ -64,7 +66,7 @@ const ChatWindow = ({ connection, onClose }) => {
 
   useEffect(() => {
     if (connection._id) {
-      fetchMessages(); 
+      fetchMessages();
     }
   }, [connection._id]);
 

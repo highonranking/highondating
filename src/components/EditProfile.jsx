@@ -20,6 +20,7 @@ const EditProfile = ({ user }) => {
   const [showModal, setShowModal] = useState(false);
   const [location, setLocation] = useState(user?.location || { latitude: "", longitude: "" });
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
+  const [isloading, setIsLoading] = useState(false);
 
   const saveProfile = async () => {
     axios.defaults.withCredentials = true;
@@ -46,6 +47,7 @@ const EditProfile = ({ user }) => {
     }
 
     try {
+      setIsLoading(true);
       const res = await axios.patch(
         BASE_URL + "/profile/edit",
         {
@@ -64,6 +66,8 @@ const EditProfile = ({ user }) => {
       setShowToast(true);
       setTimeout(() => {
         setShowToast(false);
+        setIsLoading(false);
+
       }, 3000);
     } catch (err) {
       setError(err.response?.data?.message || "An error occurred. Please try again.");
@@ -222,7 +226,9 @@ const EditProfile = ({ user }) => {
                 )}
             
                 <div className="card-actions justify-center mt-4">
-                  <button className="btn btn-primary" onClick={saveProfile}>
+                  <button className="btn btn-primary"
+                  disabled={isloading}
+                  onClick={saveProfile}>
                     Save Profile
                   </button>
                 </div>
@@ -240,7 +246,7 @@ const EditProfile = ({ user }) => {
     
 
       {showToast && (
-        <div className="toast toast-top toast-center">
+        <div className="toast absolute z-10 toast-top toast-center">
           <div className="alert alert-success">
             <span>Profile saved successfully.</span>
           </div>
@@ -274,7 +280,7 @@ const EditProfile = ({ user }) => {
           onClick={() => setShowModal(false)}
           disabled={skills.length < 3 || skills.length > 5}
         >
-          Close
+          Done
         </button>
       </div>
       {skills.length < 3 && (
