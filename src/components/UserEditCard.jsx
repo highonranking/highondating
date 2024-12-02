@@ -39,6 +39,8 @@ const UserEditCard = (data) => {
       )}
     </div>
 
+    <p className='card-normal'>{data.user?.address}</p>
+
     
   </div>
 
