@@ -63,6 +63,11 @@ const Header = () => {
               <li>
                 <Link to="/connections">Connections</Link>
               </li>
+              <li>
+                <button type="button" onClick={handleLogout}>
+                  Logout
+                </button>
+              </li>
             </ul>
           </div>
         )}
