@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { BASE_URL, MAP_URL } from "../utils/constants";
+import { BASE_URL } from "../utils/constants";
 import { useDispatch } from "react-redux";
 import { addUser } from "../utils/userSlice";
 import UserEditCard from "./UserEditCard";
@@ -23,7 +23,7 @@ const EditProfile = ({ user }) => {
   const [location, setLocation] = useState(user?.location || { latitude: "", longitude: "" });
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
   const [isloading, setIsLoading] = useState(false);
-  const [address, setAddress] = useState("");
+  const [address, setAddress] = useState(user?.address);
 
 
   const saveProfile = async () => {
@@ -32,109 +32,109 @@ const EditProfile = ({ user }) => {
     setError("");
 
     if (skills.length < 3 || skills.length > 5) {
-      setError("Please select at least 3 skills and at most 5 skills.");
-      return;
+        setError("Please select at least 3 skills and at most 5 skills.");
+        return;
     }
-    const lat = parseFloat(location.latitude || user?.location.coordinates[0]);
-    const lon = parseFloat(location.longitude || user?.location.coordinates[1]);
-
-
-    console.log(lat, lon);
+    const lat = parseFloat(location.latitude || user?.location?.coordinates[0]);
+    const lon = parseFloat(location.longitude || user?.location?.coordinates[1]);
 
     if (isNaN(lat) || isNaN(lon)) {
-      setError("Latitude and Longitude must be valid numbers.");
-      return;
+        setError("Latitude and Longitude must be valid numbers.");
+        return;
     }
 
     if (lat === "" || lon === "") {
-      setError("Please provide a valid location.");
-      return;
+        setError("Please provide a valid location.");
+        return;
     }
 
     try {
-      setIsLoading(true);
-      const res = await axios.patch(
-        BASE_URL + "/profile/edit",
-        {
-          firstName,
-          lastName,
-          photoUrl,
-          age,
-          gender,
-          about,
-          skills,
-          location: { type: "Point", coordinates: [lon, lat] },
-        },
-        { withCredentials: true }
-      );
-      dispatch(addUser(res?.data?.data));
-      setShowToast(true);
-      setTimeout(() => {
-      setShowToast(false);
+        setIsLoading(true);
+        const res = await axios.patch(
+            BASE_URL + "/profile/edit",
+            {
+                firstName,
+                lastName,
+                photoUrl,
+                age,
+                gender,
+                about,
+                skills,
+                location: { type: "Point", coordinates: [lon, lat] },
+            },
+            { withCredentials: true }
+        );
+        const updatedUser = res?.data?.data;
+        dispatch(
+            addUser({
+                ...updatedUser,
+                address,
+            })
+        );
+        setShowToast(true);
+        setTimeout(() => {
+            setShowToast(false);
+        }, 3000);
 
-      }, 3000);
-
-      setTimeout(() => {
-         setIsLoading(false);
-  
-        }, 1000);
-    } catch (err) {
-      setShowError(true);
-      setTimeout(() => {
-      setShowError(false);
-
-      }, 3000);
-
-      setTimeout(() => {
         setIsLoading(false);
-  
-        }, 1000);
-      setError(err.response?.data?.message || "An error occurred. Please try again.");
+    } catch (err) {
+        setShowError(true);
+        setTimeout(() => {
+            setShowError(false);
+        }, 3000);
+
+        setIsLoading(false);
+        setError(err.response?.data?.message || "An error occurred. Please try again.");
     }
-  };
+};
 
   const fetchCurrentLocation = async () => {
     if (!navigator.geolocation) {
-      setError("Geolocation is not supported by your browser.");
-      return;
+        setError("Geolocation is not supported by your browser.");
+        return;
     }
-  
     setIsFetchingLocation(true);
     setError("");
-  
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
-  
-        setLocation({
-          latitude: lat,
-          longitude: lon,
-        });
-  
-        try {
-          const response = await axios.get(BASE_URL + `/api/maps/getAddress`, {
-            params: { lat, lon },
-          });
-          console.log(response);
-          setAddress(response.data?.address);
-         // dispatch(addUser({ address: response.data?.address }));
 
-        } catch (err) {
-          console.error("Error fetching address:", err);
-          setError("Failed to fetch address. Please try again.");
-        } finally {
-          setIsFetchingLocation(false);
+    navigator.geolocation.getCurrentPosition(
+        async (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            setLocation({
+                latitude: lat,
+                longitude: lon,
+            });
+
+            try {
+                const response = await axios.get(BASE_URL + `/api/maps/getAddress`, {
+                    params: { lat, lon },
+                });
+                const fetchedAddress = response.data?.address;
+
+                setAddress(fetchedAddress);
+
+                dispatch(
+                    addUser({
+                        ...user, 
+                        location: { type: "Point", coordinates: [lon, lat] },
+                        address: fetchedAddress,
+                    })
+                );
+            } catch (err) {
+                console.error("Error fetching address:", err);
+                setError("Failed to fetch address. Please try again.");
+            } finally {
+                setIsFetchingLocation(false);
+            }
+        },
+        (err) => {
+            console.error("Error fetching location:", err);
+            setError("Unable to fetch location. Please enter manually.");
+            setIsFetchingLocation(false);
         }
-      },
-      (err) => {
-        console.error("Error fetching location:", err);
-        setError("Unable to fetch location. Please enter manually.");
-        setIsFetchingLocation(false);
-      }
     );
-  };
-  
+};
+
   const toggleSkill = (skill) => {
     setSkills((prev) =>
       prev.includes(skill)

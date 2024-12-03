@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSpring, animated, config } from "@react-spring/web";
 import { useSwipeable } from "react-swipeable";
 import { toast, ToastContainer } from "react-toastify";
@@ -9,8 +9,11 @@ import { BASE_URL } from "../utils/constants";
 import { removeUserFromFeed } from "../utils/feedSlice";
 
 const UserCard = ({ user, distance }) => {
-  const { _id, firstName, lastName, photoUrl, age, gender, about, skills } = user;
+  const { _id, firstName, lastName, photoUrl, age, gender, about, skills, address } = user;
   const dispatch = useDispatch();
+
+  const cleanAddress = address ? address.split(",").slice(1).join(",").trim() : "Location not available";
+
 
   const [{ x, rotate, scale }, api] = useSpring(() => ({
     x: 0,
@@ -19,6 +22,7 @@ const UserCard = ({ user, distance }) => {
     config: { tension: 250, friction: 20, clamp: false }, 
   }));
 
+ 
   const handleAction = async (status) => {
     try {
       await axios.post(
@@ -128,6 +132,10 @@ const UserCard = ({ user, distance }) => {
               <p className="text-gray-400">No skills found</p>
             )}
           </div>
+
+          <p className="text-gray-500 mb-4">
+            <strong>Lives in:</strong> {cleanAddress}
+          </p>
 
           <div className="flex justify-between mt-6">
             <button
