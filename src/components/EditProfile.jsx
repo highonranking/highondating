@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { BASE_URL } from "../utils/constants";
 import { useDispatch } from "react-redux";
@@ -24,6 +24,7 @@ const EditProfile = ({ user }) => {
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
   const [isloading, setIsLoading] = useState(false);
   const [address, setAddress] = useState(user?.address);
+  const [toastMessage, setToastMessage] = useState("");
 
 
   const saveProfile = async () => {
@@ -33,18 +34,31 @@ const EditProfile = ({ user }) => {
 
     if (skills.length < 3 || skills.length > 5) {
         setError("Please select at least 3 skills and at most 5 skills.");
+        setShowError(true); 
+        setTimeout(() => {
+            setShowError(false);
+        }, 3000);
         return;
     }
+
     const lat = parseFloat(location.latitude || user?.location?.coordinates[0]);
     const lon = parseFloat(location.longitude || user?.location?.coordinates[1]);
 
     if (isNaN(lat) || isNaN(lon)) {
         setError("Latitude and Longitude must be valid numbers.");
+        setShowError(true); 
+        setTimeout(() => {
+            setShowError(false);
+        }, 3000);
         return;
     }
 
     if (lat === "" || lon === "") {
         setError("Please provide a valid location.");
+        setShowError(true); 
+        setTimeout(() => {
+            setShowError(false);
+        }, 3000);
         return;
     }
 
@@ -64,6 +78,7 @@ const EditProfile = ({ user }) => {
             },
             { withCredentials: true }
         );
+
         const updatedUser = res?.data?.data;
         dispatch(
             addUser({
@@ -71,68 +86,88 @@ const EditProfile = ({ user }) => {
                 address,
             })
         );
-        setShowToast(true);
+
+        setShowToast(true); 
+        setToastMessage("Profile Saved!")
         setTimeout(() => {
             setShowToast(false);
+            setToastMessage("");
         }, 3000);
 
         setIsLoading(false);
     } catch (err) {
-        setShowError(true);
+        setError(err.response?.data?.message || "An error occurred. Please try again.");
+        setShowError(true); 
         setTimeout(() => {
             setShowError(false);
         }, 3000);
 
         setIsLoading(false);
-        setError(err.response?.data?.message || "An error occurred. Please try again.");
     }
 };
 
-  const fetchCurrentLocation = async () => {
-    if (!navigator.geolocation) {
-        setError("Geolocation is not supported by your browser.");
-        return;
-    }
-    setIsFetchingLocation(true);
-    setError("");
 
-    navigator.geolocation.getCurrentPosition(
-        async (position) => {
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
-            setLocation({
-                latitude: lat,
-                longitude: lon,
-            });
+const fetchCurrentLocation = async () => {
+  if (!navigator.geolocation) {
+      setError("Geolocation is not supported by your browser.");
+      return;
+  }
+  setIsFetchingLocation(true);
+  setError("");
 
-            try {
-                const response = await axios.get(BASE_URL + `/api/maps/getAddress`, {
-                    params: { lat, lon },
-                });
-                const fetchedAddress = response.data?.address;
+  navigator.geolocation.getCurrentPosition(
+      async (position) => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          setLocation({
+              latitude: lat,
+              longitude: lon,
+          });
 
-                setAddress(fetchedAddress);
+          try {
+              const response = await axios.get(BASE_URL + `/api/maps/getAddress`, {
+                  params: { lat, lon },
+              });
+              const fetchedAddress = response.data?.address;
 
-                dispatch(
-                    addUser({
-                        ...user, 
-                        location: { type: "Point", coordinates: [lon, lat] },
-                        address: fetchedAddress,
-                    })
-                );
-            } catch (err) {
-                console.error("Error fetching address:", err);
-                setError("Failed to fetch address. Please try again.");
-            } finally {
-                setIsFetchingLocation(false);
-            }
-        },
-        (err) => {
-            console.error("Error fetching location:", err);
-            setError("Unable to fetch location. Please enter manually.");
-            setIsFetchingLocation(false);
-        }
-    );
+              setAddress(fetchedAddress);
+
+              dispatch(
+                  addUser({
+                      ...user, 
+                      location: { type: "Point", coordinates: [lon, lat] },
+                      address: fetchedAddress,
+                  })
+              );
+
+              setShowToast(true); 
+              setToastMessage("Location Fetched!")
+              
+              setTimeout(() => {
+                  setShowToast(false);
+                  setToastMessage("");
+              }, 3000);
+          } catch (err) {
+              console.error("Error fetching address:", err);
+              setError(err.response?.data?.error || "Failed to fetch address. Please try again.");
+              setShowError(true); 
+              setTimeout(() => {
+                  setShowError(false);
+              }, 3000);
+          } finally {
+              setIsFetchingLocation(false);
+          }
+      },
+      (err) => {
+          console.error("Error fetching location:", err);
+          setError("Unable to fetch location. Please enter manually.");
+          setShowError(true);
+          setTimeout(() => {
+              setShowError(false);
+          }, 3000);
+          setIsFetchingLocation(false);
+      }
+  );
 };
 
   const toggleSkill = (skill) => {
@@ -301,7 +336,7 @@ const EditProfile = ({ user }) => {
       {showToast && (
         <div className="toast fixed z-10 toast-top toast-center">
           <div className="alert alert-success">
-            <span>Profile saved successfully.</span>
+            <span>{toastMessage}</span>
           </div>
         </div>
       )}
