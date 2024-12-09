@@ -40,7 +40,7 @@ const ChatWindow = ({ connection, onClose }) => {
   
       socket.emit("new_message", message);
   
-      setMessages((prev) => [...prev, { ...message, local: true }]);
+      //setMessages((prev) => [...prev, { ...message, local: true }]);
   
       await axios.post(`${BASE_URL}/api/messages`, message, { withCredentials: true });
   
