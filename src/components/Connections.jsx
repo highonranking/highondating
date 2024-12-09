@@ -28,13 +28,11 @@ const Connections = () => {
 
   
   const fetchUnreadMessageCount = async (connectionId) => {
-    console.log("Fetching unread count for user:", connectionId);
     try {
       const res = await axios.get(
         `${BASE_URL}/api/messages/unread-count?userId=${connectionId}`,
         { withCredentials: true }
       );
-      console.log("Unread count response:", res.data.unreadCount); 
       setUnreadCounts((prevCounts) => ({
         ...prevCounts,
         [connectionId]: res.data.unreadCount,
