@@ -3,14 +3,15 @@ import { BASE_URL } from "../utils/constants";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addConnections } from "../utils/connectionSlice";
-import ChatWindow from "./ChatWindow"; // Import ChatWindow component
+import ChatWindow from "./ChatWindow"; 
 import ShimmerUserCard from "./ShimmerUserCard";
 
 
 const Connections = () => {
   const connections = useSelector((store) => store.connections);
   const dispatch = useDispatch();
-  const [selectedConnection, setSelectedConnection] = useState(null); // To manage selected chat
+  const [selectedConnection, setSelectedConnection] = useState(null); 
+  const [unreadCounts, setUnreadCounts] = useState({});
 
   const fetchConnections = async () => {
     axios.defaults.withCredentials = true;
@@ -25,9 +26,34 @@ const Connections = () => {
     }
   };
 
+  
+  const fetchUnreadMessageCount = async (connectionId) => {
+    try {
+      const res = await axios.get(
+        `${BASE_URL}/api/messages/unread-count?userId=${connectionId}`,
+        { withCredentials: true }
+      );
+      setUnreadCounts((prevCounts) => ({
+        ...prevCounts,
+        [connectionId]: res.data.unreadCount,
+      }));
+    } catch (err) {
+      console.error("Error fetching unread message count:", err);
+    }
+  };
+  
+
   useEffect(() => {
     fetchConnections();
   }, []);
+
+  useEffect(() => {
+    if (connections?.length > 0) {
+      connections.forEach((connection) => {
+        fetchUnreadMessageCount(connection._id); 
+      });
+    }
+  }, [connections]);
 
   if (!connections) return(
     <div className="flex justify-center items-center h-screen">
@@ -82,12 +108,19 @@ const Connections = () => {
                     <p className="text-gray-500">No skills found</p>
                   )}
                 </div>
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => setSelectedConnection(connection)}
-                  >
-                    Send Message
-                  </button>
+                <button
+                  className="btn btn-primary relative"
+                  onClick={() => setSelectedConnection(connection)}
+                >
+                  Send Message
+
+                  {unreadCounts[_id] > 0 && (
+                    <span className="absolute top-0 right-0 text-white text-xs bg-red-500 rounded-full w-5 h-5 flex justify-center items-center">
+                      {unreadCounts[_id]}
+                    </span>
+                  )}
+                </button>
+
                 </div>
               </div>
             </div>
@@ -95,7 +128,6 @@ const Connections = () => {
         })}
       </div>
 
-      {/* Render Chat Window */}
       {selectedConnection && (
         <ChatWindow
           connection={selectedConnection}
