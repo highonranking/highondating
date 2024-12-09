@@ -49,6 +49,21 @@ const ChatWindow = ({ connection, onClose }) => {
       console.error("Error sending message:", err);
     }
   };
+
+
+  const markMessagesAsRead = async () => {
+    try {
+      await axios.put(`${BASE_URL}/api/messages/mark-as-read`, {
+        senderId: connection._id,
+        receiverId: loggedInUserId,
+      });
+      setMessages((prevMessages) =>
+        prevMessages.map((message) => ({ ...message, isRead: true }))
+      );
+    } catch (err) {
+      console.error("Error marking messages as read:", err);
+    }
+  };
   
   useEffect(() => {
     if (!connection?._id) return;
@@ -74,6 +89,11 @@ const ChatWindow = ({ connection, onClose }) => {
       fetchMessages();
     }
   }, [connection._id]);
+
+  useEffect(() => {
+    markMessagesAsRead();
+  }, [connection._id]);
+
 
   return (
     <div className="fixed card rounded-xl inset-0 flex items-center justify-center bg-black bg-opacity-50">
