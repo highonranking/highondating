@@ -4,7 +4,11 @@ import { BASE_URL } from "../utils/constants";
 import { io } from "socket.io-client";
 import { useSelector } from "react-redux";
 
-const socket = io(BASE_URL);
+const socket = io(BASE_URL, {
+  transports: ["websocket", "polling"],
+  path: "/socket.io/",
+});
+
 
 const ChatWindow = ({ connection, onClose }) => {
   const user = useSelector((store) => store.user);
@@ -33,36 +37,37 @@ const ChatWindow = ({ connection, onClose }) => {
         receiverId: connection._id,
         messageContent: newMessage,
       };
+  
+      socket.emit("new_message", message);
+  
       setMessages((prev) => [...prev, { ...message, local: true }]);
-      const res = await axios.post(`${BASE_URL}/api/messages`, message, {
-        withCredentials: true,
-      });
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.local ? { ...res.data.message, local: false } : msg
-        )
-      );
-
+  
+      await axios.post(`${BASE_URL}/api/messages`, message, { withCredentials: true });
+  
       setNewMessage("");
     } catch (err) {
       console.error("Error sending message:", err);
     }
   };
-
+  
   useEffect(() => {
     if (!connection?._id) return;
-
-    socket.emit("join_room", connection._id);
-
+  
+    const roomId = [loggedInUserId, connection._id].sort().join("_");
+  
+    socket.emit("join_room", loggedInUserId, connection._id);
+  
     socket.on("new_message", (message) => {
       setMessages((prevMessages) => [...prevMessages, message]);
     });
-
+  
     return () => {
-      socket.emit("leave_room", connection._id);
+      socket.emit("leave_room", loggedInUserId, connection._id);
       socket.off("new_message");
     };
-  }, [connection._id]);
+  }, [connection._id, loggedInUserId]);
+  
+  
 
   useEffect(() => {
     if (connection._id) {

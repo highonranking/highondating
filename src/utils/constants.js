@@ -1,5 +1,5 @@
-export const BASE_URL = 'https://api.bookmyheart.in';
-//export const BASE_URL = 'http://localhost:7777';
+//export const BASE_URL = 'https://api.bookmyheart.in';
+export const BASE_URL = 'http://localhost:7777';
 export const totalskills = [
     "JavaScript",
     "React",
